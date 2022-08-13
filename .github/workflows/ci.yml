@@ -16,7 +16,7 @@ name: oneTBB CI
 
 on:
   push:
-    branches: [master]
+    branches: [master, msvc_vs_*]
 
   pull_request:
     branches: [master]
@@ -237,6 +237,65 @@ jobs:
             -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} -DTBB_CPF=${{ matrix.preview }} ..
           cmake --build . --config ${{ matrix.build_type }} -j -v
           ctest -C ${{ matrix.build_type }} --timeout ${env:TEST_TIMEOUT} --output-on-failure
+
+  windows-testing-vsproject:
+    name: ${{ matrix.job_name }}
+    runs-on: ['${{ matrix.os }}']
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-2019
+            generator: Visual Studio 16 2019
+            arch: Win32
+            toolset: v142
+            c_compiler: cl
+            cxx_compiler: cl
+            std: 20
+            build_type: Release
+            preview: 'ON'
+            job_name: windows_cl2019_vs_win32_cxx20_lto_release_preview=ON
+          - os: windows-2019
+            generator: Visual Studio 16 2019
+            arch: x64
+            toolset: v142
+            c_compiler: cl
+            cxx_compiler: cl
+            std: 20
+            build_type: Release
+            preview: 'ON'
+            job_name: windows_cl2019_vs_x64_cxx20_lto_release_preview=ON
+          - os: windows-2019
+            generator: Visual Studio 16 2019
+            arch: Win32
+            toolset: v142
+            c_compiler: cl
+            cxx_compiler: cl
+            std: 20
+            build_type: relwithdebinfo
+            preview: 'ON'
+            job_name: windows_cl2019_vs_win32_cxx20_lto_relwithdebinfo_preview=ON
+          - os: windows-2019
+            generator: Visual Studio 16 2019
+            arch: x64
+            toolset: v142
+            c_compiler: cl
+            cxx_compiler: cl
+            std: 20
+            build_type: relwithdebinfo
+            preview: 'ON'
+            job_name: windows_cl2019_vs_x64_cxx20_lto_relwithdebinfo_preview=ON
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run testing
+        run: |
+          mkdir build
+          cd build
+          cmake -G "${{ matrix.generator }}" -A ${{ matrix.arch }} -T ${{ matrix.toolset }} -DCMAKE_CXX_STANDARD=${{ matrix.std }} `
+            -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=ON -DTBB_CPF=${{ matrix.preview }} ..
+          cmake --build . --config ${{ matrix.build_type }} -j -v
+          ctest -C ${{ matrix.build_type }} --timeout ${env:TEST_TIMEOUT} --output-on-failure --repeat-until-fail 3
 
   linux-examples-testing:
     name: examples_${{ matrix.os }}_${{ matrix.cxx_compiler }}_cxx${{ matrix.std }}_${{ matrix.build_type }}_preview=${{ matrix.preview }}
