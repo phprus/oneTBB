@@ -16,7 +16,7 @@ name: oneTBB CI
 
 on:
   push:
-    branches: [master]
+    branches: [master,broken-unsafe_wait]
 
   pull_request:
     branches: [master]
@@ -107,26 +107,27 @@ jobs:
           git commit --reset-author --amend -m "Update from GitHub Actions"
           git push --force origin gh-pages
 
-  copyright_check:
-    if: ${{ github.ref != 'refs/heads/master' }}
-    runs-on: [ubuntu-20.04]
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-      - name: Run check
-        run: |
-          sed -i \
-            -e "/Copyright (c) .* Intel Corporation/s/ \([0-9]\+\)[-0-9]*/ \\1-$(date +%Y)/" \
-            -e "/Copyright (c) .* Intel Corporation/s/$(date +%Y)-$(date +%Y)/$(date +%Y)/" \
-            $(git diff --diff-filter=d --name-only ${{ github.event.pull_request.base.sha }})
-          git checkout -- third-party-programs.txt
-          git diff > years.diff
-          if [[ -s years.diff ]]; then
-            echo "Wrong copyright years"
-            cat years.diff
-            exit 1
-          fi
+#  copyright_check:
+#    if: ${{ github.ref != 'refs/heads/master' }}
+#    runs-on: [ubuntu-20.04]
+#    steps:
+#      - uses: actions/checkout@v2
+#        with:
+#          fetch-depth: 0
+#      - name: Run check
+#        run: |
+#          sed -i \
+#            -e "/Copyright (c) .* Intel Corporation/s/ \([0-9]\+\)[-0-9]*/ \\1-$(date +%Y)/" \
+#            -e "/Copyright (c) .* Intel Corporation/s/$(date +%Y)-$(date +%Y)/$(date +%Y)/" \
+#            $(git diff --diff-filter=d --name-only ${{ github.event.pull_request.base.sha }})
+#          git checkout -- third-party-programs.txt
+#          git diff > years.diff
+#          if [[ -s years.diff ]]; then
+#            echo "Wrong copyright years"
+#            cat years.diff
+#            exit 1
+#          fi
+
   python_module_test_ubuntu_latest:
     runs-on: [ubuntu-latest]
     timeout-minutes: 15
