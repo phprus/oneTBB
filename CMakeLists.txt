@@ -16,6 +16,12 @@ cmake_minimum_required(VERSION 3.1)
 
 # Enable CMake policies
 
+if (POLICY CMP0063)
+    # The NEW behavior for this policy is to honor the visibility properties for all target types.
+    cmake_policy(SET CMP0063 NEW)
+    set(CMAKE_POLICY_DEFAULT_CMP0063 NEW)
+endif()
+
 if (POLICY CMP0091)
     # The NEW behavior for this policy is to not place MSVC runtime library flags in the default
     # CMAKE_<LANG>_FLAGS_<CONFIG> cache entries and use CMAKE_MSVC_RUNTIME_LIBRARY abstraction instead.
