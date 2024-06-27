@@ -16,7 +16,7 @@ name: oneTBB CI
 
 on:
   push:
-    branches: [master]
+    branches: [master, issue-1427-test]
 
   pull_request:
     branches: [master]
